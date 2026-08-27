@@ -1,0 +1,30 @@
+name: Verify ChistoMebel demo
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/verify-chistomebel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check public demo URL
+        run: |
+          URL="https://hippoundefined101r-spec.github.io/forma-demo/chistomebel/"
+          for i in {1..12}; do
+            BODY="$(curl -LfsS --max-time 15 "$URL" || true)"
+            if echo "$BODY" | grep -q "ЧистоМебель" && echo "$BODY" | grep -q "Фото клиента"; then
+              echo "Demo is live and contains expected content"
+              exit 0
+            fi
+            echo "Attempt $i: page not ready yet"
+            sleep 5
+          done
+          echo "Demo verification failed"
+          exit 1
